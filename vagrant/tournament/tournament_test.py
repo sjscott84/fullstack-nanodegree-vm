@@ -102,7 +102,7 @@ def testReportMatches():
         if w != 0:
             raise ValueError("After deleting matches, players should have zero wins recorded.")
     print "8. After match deletion, player standings are properly reset.\n9. Matches are properly deleted."
-
+    
 def testPairings():
     """
     Test that pairings are generated properly both before and after match reporting.
@@ -145,7 +145,6 @@ def testPairings():
             raise ValueError(
                 "After one match, players with one win should be paired.")
     print "10. After one match, players with one win are properly paired."
-
 
 if __name__ == '__main__':
     testCount()
