@@ -16,8 +16,6 @@ def deleteMatches():
     conn = connect()
     c = conn.cursor()
     c.execute("DELETE FROM matches")
-    c.execute("UPDATE players SET player_losses = %s,\
-        player_wins = %s", (0,0))
     conn.commit()
     conn.close()
 
@@ -35,7 +33,7 @@ def countPlayers():
     """Returns the number of players currently registered."""
     conn = connect()
     c = conn.cursor()
-    c.execute("SELECT count (player_id) FROM players")
+    c.execute("SELECT count (id) FROM players")
     count = c.fetchone()
     conn.commit()
     conn.close()
@@ -53,7 +51,7 @@ def registerPlayer(name):
     """
     conn = connect()
     c = conn.cursor()
-    c.execute("INSERT into players values (default,%s,0,0)",\
+    c.execute("INSERT INTO players VALUES (default,%s)",\
         [name])
     conn.commit()
     conn.close()
@@ -72,16 +70,17 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-
     conn = connect()
     c = conn.cursor()
-    c.execute("SELECT * from players ORDER By player_wins desc")
+    c.execute("SELECT id, name, COUNT (CASE WHEN id = winner THEN winner END),\
+        COUNT (CASE WHEN id = winner OR id = loser THEN match_num END) \
+        FROM players LEFT JOIN matches ON id = winner or id = loser GROUP BY id")
     data = c.fetchall()
-    conn.commit()
-    conn.close()
     l = []
     for row in data:
-        l.append((row[0], row[1], row[2], row[2] + row[3]))
+        l.append((row[0], row[1], row[2], row[3]))
+    conn.commit()
+    conn.close()
     return l
 
 
@@ -94,18 +93,8 @@ def reportMatch(winner, loser):
     """
     conn = connect()
     c = conn.cursor()
-    c.execute("SELECT player_wins FROM players where player_id = %s",\
-        [winner])
-    update_wins = c.fetchone()[0] + 1
-    c.execute("SELECT player_losses FROM players where player_id = %s",\
-        [loser])
-    update_losses = c.fetchone()[0] + 1
-    c.execute("INSERT into matches VALUES (default, %s, %s, %s)",\
-        (winner, loser, winner))
-    c.execute("UPDATE players SET player_wins = %s WHERE player_id = %s",\
-        (update_wins, winner))
-    c.execute("UPDATE players SET player_losses = %s WHERE player_id = %s",\
-        (update_losses, loser))
+    c.execute("INSERT INTO matches VALUES (default, %s, %s)",\
+        (winner, loser))
     conn.commit()
     conn.close()
 
@@ -127,7 +116,8 @@ def swissPairings():
     """
     conn = connect()
     c = conn.cursor()
-    c.execute("SELECT * from players ORDER By player_wins desc")
+    c.execute("SELECT id, name, count(winner) AS wins FROM players\
+        LEFT JOIN matches ON id = winner GROUP BY id ORDER BY wins DESC")
     data = c.fetchall()
     conn.commit()
     conn.close()
