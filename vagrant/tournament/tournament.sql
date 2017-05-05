@@ -6,7 +6,7 @@
 -- You can write comments in this file by starting them with two dashes, like
 -- these lines here.
 
--- Ensure you create these tables in the database by running \i tournament.sql
+-- Ensure you create these tables in the tournament database by running \i tournament.sql
 -- once connected to the tournment database
 
 -- Creates a table to hold all the players
