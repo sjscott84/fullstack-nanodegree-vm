@@ -19,11 +19,12 @@ CD into /vagrant to enter the virtual machine.
 ## Creating a database for the tournament project 
 
 To create a database enter psql in the terminal and then enter 'create database tournament;'.  
-To connect to the database enter \c tournament
+To connect to the database enter \c tournament.
+You can then create the tables by entering \i tournaments.sql.
 Exit psql by entering \q.  
 
 ## Running tournament project
 
-CD into tournament and enter 'python tournament_test.py' to run the tests for this project
+CD into tournament and enter 'python tournament_test.py' to run the tests for this project.
 
 
