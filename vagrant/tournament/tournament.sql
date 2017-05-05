@@ -6,6 +6,9 @@
 -- You can write comments in this file by starting them with two dashes, like
 -- these lines here.
 
+-- Ensure you create these tables in the database by running \i tournament.sql
+-- once connected to the tournment database
+
 -- Creates a table to hold all the players
 CREATE TABLE Players (
     id serial primary key,
@@ -19,4 +22,7 @@ CREATE TABLE Matches (
     loser serial references Players
 );
 
-
+CREATE VIEW player_standings as
+    SELECT id, name, COUNT (CASE WHEN id = winner THEN winner END) as wins,
+    COUNT (CASE WHEN id = winner OR id = loser THEN match_num END) as matches_played
+    FROM players LEFT JOIN matches ON id = winner or id = loser GROUP BY id;

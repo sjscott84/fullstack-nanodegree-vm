@@ -71,9 +71,7 @@ def playerStandings():
         matches: the number of matches the player has played
     """
     db, cursor = connect()
-    cursor.execute("SELECT id, name, COUNT (CASE WHEN id = winner THEN winner END),\
-        COUNT (CASE WHEN id = winner OR id = loser THEN match_num END)\
-        FROM players LEFT JOIN matches ON id = winner or id = loser GROUP BY id")
+    cursor.execute("SELECT * FROM player_standings")
     data = cursor.fetchall()
     l = []
     for row in data:
