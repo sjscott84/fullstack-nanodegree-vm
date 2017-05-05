@@ -19,7 +19,7 @@ CD into /vagrant to enter the virtual machine.
 ## Creating a database for the tournament project 
 
 To create a database enter psql in the terminal and then enter 'create database tournament;'.  
-To connect to the database enter \c tournament.
+To connect to the database enter \c tournament.  
 You can then create the tables by entering \i tournaments.sql.
 Exit psql by entering \q.  
 
