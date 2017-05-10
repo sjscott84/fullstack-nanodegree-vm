@@ -1,9 +1,8 @@
-<html>
-	<body>
+{% extends "main.html" %}
+{% block content %}
 		<h2>ADD AN ARTIST!</h2>
 		<form method="POST" action="{{ url_for('addArtist')}}">
 			<input type="text" name="artist_name">
 			<input type="submit">
 		</form>
-	</body>
-</html>
+{% endblock %}

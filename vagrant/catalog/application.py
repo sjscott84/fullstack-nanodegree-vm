@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 app = Flask(__name__)
 
 from sqlalchemy import create_engine
@@ -10,19 +10,18 @@ Base.metadata.bind=engine
 DBSession = sessionmaker(bind = engine)
 session = DBSession()
 
+#main page - displays a list of artists
 @app.route('/')
 @app.route('/artists/')
 def showArtists():
   items = session.query(Artist).all()
   return render_template('artists.html', items = items)
 
-@app.route('/')
+# Add a new artist
 @app.route('/artists/add_artist/', methods=['GET', 'POST'])
 def addArtist():
-  #items = session.query(Artist).all()
   if request.method == 'POST':
-    #checkArtist = session.query(Artist).filter_by(request.form['artist_name'] = Artist.name)
-    #if not checkArtist:
+    #TODO = make sure artist does not already exist
     newArtist = Artist(name = request.form['artist_name'])
     session.add(newArtist)
     session.commit()
@@ -30,14 +29,41 @@ def addArtist():
   else:
     return render_template('add_artist.html')
 
-@app.route('/')
+# Delete a particular artist
+@app.route('/artists/<int:idOfArtist>/delete_artist', methods=['GET', 'POST'])
+def deleteArtist(idOfArtist):
+  artist = session.query(Artist).filter_by(id = idOfArtist).one()
+  artist_works = session.query(ArtWork).filter_by(artist_id = idOfArtist).all()
+  if request.method == 'POST':
+    for art in artist_works:
+      session.delete(art)
+    session.delete(artist)
+    session.commit()
+    return redirect(url_for('showArtists'))
+  else:
+    return render_template('delete_artist.html', id = idOfArtist, name = artist.name)
+
+# Edit a particular artist
+@app.route('/artists/<int:idOfArtist>/edit_artist', methods=['GET', 'POST'])
+def editArtist(idOfArtist):
+  artist = session.query(Artist).filter_by(id = idOfArtist).one()
+  if request.method == 'POST':
+    artist.name = request.form['name']
+    session.add(artist)
+    session.commit()
+    return redirect(url_for('showArtists'))
+  else:
+    return render_template('edit_artist.html', id = idOfArtist, name = artist.name)
+
+# Show all art works associated with particular artist
 @app.route('/artists/<int:idOfArtist>/', methods=['GET', 'POST'])
 def showArtistDetails(idOfArtist):
   artistFromDB = session.query(Artist).filter_by(id = idOfArtist).one()
   items = session.query(ArtWork).filter_by(artist_id = idOfArtist)
   return render_template('art_works.html', items = items, name = artistFromDB.name, id = idOfArtist)
 
-@app.route('/')
+
+# Add a new work for a particular artist
 @app.route('/artists/<int:idOfArtist>/add_work/', methods=['GET', 'POST'])
 def addArtWork(idOfArtist):
   if request.method == 'POST':
@@ -50,7 +76,8 @@ def addArtWork(idOfArtist):
     artistFromDB = session.query(Artist).filter_by(id = idOfArtist).one()
     return render_template('add_art_work.html', name = artistFromDB.name, id = idOfArtist)
 
-@app.route('/')
+
+# Delete a work by a particular artist
 @app.route('/artists/<int:idOfArt>/delete_work/', methods=['GET', 'POST'])
 def deleteArtWork(idOfArt):
   art = session.query(ArtWork).filter_by(id = idOfArt).one()
@@ -60,6 +87,27 @@ def deleteArtWork(idOfArt):
     return redirect(url_for('showArtistDetails', idOfArtist = art.artist_id))
   else:
     return render_template('delete_art.html', title = art.title, id = idOfArt)
+
+
+# Edit an entry about a peice of work
+@app.route('/artists/<int:idOfArt>/edit_work/', methods=['GET', 'POST'])
+def editArtWork(idOfArt):
+  art = session.query(ArtWork).filter_by(id = idOfArt).one()
+  if request.method == 'POST':
+    art.title = request.form['title']
+    art.year = request.form['year']
+    art.image_link = request.form['image']
+    session.add(art)
+    session.commit()
+    return redirect(url_for('showArtistDetails', idOfArtist = art.artist_id))
+  else:
+    return render_template('edit_work.html', title = art.title, id = idOfArt, year = art.year, image = art.image_link)
+
+@app.route('/artists/<int:idOfArtist>/art_works/JSON')
+def restaurantMenuJSON(idOfArtist):
+    items = session.query(ArtWork).filter_by(
+        artist_id=idOfArtist).all()
+    return jsonify(ArtistWorks=[i.serialize for i in items])
 
 if __name__ == '__main__':
   app.debug = True

@@ -1,9 +1,7 @@
-<html>
-
-  <body>
-
-    <!--<a href={{ url_for('addArtist') }}>Add an artist</a>-->
+{% extends "main.html" %}
+{% block content %}
     <h2>{{name}}</h2>
+    <a href={{ url_for('addArtWork', idOfArtist = id) }}>Add an artwork!</a>
     {% for i in items %}
     <div>
       <p>{{i.title}}</p>
@@ -11,10 +9,8 @@
       <img src="{{i.image_link}}" alt="{{i.title}}" height="50%" />
       <br>
       <a href={{ url_for('deleteArtWork', idOfArt = i.id) }}>Delete this work</a>
+      <a href={{ url_for('editArtWork', idOfArt = i.id) }}>Edit this work</a>
       <br>
     </div>
     {% endfor %}
-    <a href={{ url_for('addArtWork', idOfArtist = id) }}>Add an artwork!</a>
-  </body>
-
-</html>
+{% endblock %}

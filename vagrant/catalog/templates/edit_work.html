@@ -1,0 +1,11 @@
+{% extends "main.html" %}
+{% block content %}
+		<h2>Edit {{title}}!</h2>
+		<form method="POST" action="{{ url_for('editArtWork', idOfArt = id)}}">
+			<p>Name of Art Work:<p><input type="text" name="title" value="{{title}}">
+			<p>Year of Art Work:<p><input type="text" name="year" value="{{year}}">
+			<p>Image Link:<p><input type="text" name="image" value="{{image}}">
+			<br>
+			<input type="submit" value="Edit">
+		</form>
+{% endblock %}

@@ -1,5 +1,5 @@
-<html>
-	<body>
+{% extends "main.html" %}
+{% block content %}
 		<h2>ADD AN ARTWORK FOR {{name}}!</h2>
 		<form method="POST" action="{{ url_for('addArtWork', idOfArtist = id)}}">
 			<p>Name of Art Work:<p><input type="text" name="title">
@@ -8,5 +8,4 @@
 			<br>
 			<input type="submit">
 		</form>
-	</body>
-</html>
+{% endblock %}

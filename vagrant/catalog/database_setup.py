@@ -16,12 +16,23 @@ class Artist(Base):
 class ArtWork(Base):
 
   __tablename__ = 'art_work'
+
   title = Column(String(80), nullable = False)
   id = Column(Integer, primary_key = True)
   year = Column(String(250))
   image_link = Column(String(250))
   artist_id = Column(Integer, ForeignKey('artist.id'))
   artist = relationship(Artist)
+
+  @property
+  def serialize(self):
+    """Return object data in easily serializeable format"""
+    return {
+        'title': self.title,
+        'id': self.id,
+        'year': self.year,
+        'image_link': self.image_link,
+    }
 
 
 engine = create_engine(

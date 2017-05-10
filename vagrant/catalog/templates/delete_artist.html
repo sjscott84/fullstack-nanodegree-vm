@@ -1,0 +1,7 @@
+{% extends "main.html" %}
+{% block content %}
+		<h4>Are you sure you want to delete {{name}} - this will also delete all work associated with {{name}}?</h4>
+		<form method='POST' action="{{ url_for('deleteArtist', idOfArtist = id)}}">
+			<input type="SUBMIT" value="Delete">
+		</form>
+{% endblock %}
