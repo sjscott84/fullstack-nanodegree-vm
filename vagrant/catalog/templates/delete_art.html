@@ -1,0 +1,8 @@
+<html>
+	<body>
+		<h4>Are you sure you want to delete {{title}}?</h4>
+		<form method='POST' action="{{ url_for('deleteArtWork', idOfArt = id)}}">
+			<input type="SUBMIT" value="Delete">
+		</form>
+	</body>
+</html>

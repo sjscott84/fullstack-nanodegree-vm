@@ -1,0 +1,20 @@
+<html>
+
+  <body>
+
+    <!--<a href={{ url_for('addArtist') }}>Add an artist</a>-->
+    <h2>{{name}}</h2>
+    {% for i in items %}
+    <div>
+      <p>{{i.title}}</p>
+      <p>{{i.year}}</p>
+      <img src="{{i.image_link}}" alt="{{i.title}}" height="50%" />
+      <br>
+      <a href={{ url_for('deleteArtWork', idOfArt = i.id) }}>Delete this work</a>
+      <br>
+    </div>
+    {% endfor %}
+    <a href={{ url_for('addArtWork', idOfArtist = id) }}>Add an artwork!</a>
+  </body>
+
+</html>

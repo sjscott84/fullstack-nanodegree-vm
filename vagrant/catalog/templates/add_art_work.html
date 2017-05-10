@@ -1,0 +1,12 @@
+<html>
+	<body>
+		<h2>ADD AN ARTWORK FOR {{name}}!</h2>
+		<form method="POST" action="{{ url_for('addArtWork', idOfArtist = id)}}">
+			<p>Name of Art Work:<p><input type="text" name="title">
+			<p>Year of Art Work:<p><input type="text" name="year">
+			<p>Image Link:<p><input type="text" name="image">
+			<br>
+			<input type="submit">
+		</form>
+	</body>
+</html>
