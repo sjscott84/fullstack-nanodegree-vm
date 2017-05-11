@@ -1,16 +1,25 @@
 {% extends "main.html" %}
 {% block content %}
-    <h2>{{name}}</h2>
-    <a href={{ url_for('addArtWork', idOfArtist = id) }}>Add an artwork!</a>
+<h1>{{name}}</h1>
+<div class="links">
+  <ul>
+    <li><a href={{ url_for('deleteArtist', idOfArtist = id) }}>Delete Artist</a></li>
+    <li><a class="right" href={{ url_for('editArtist', idOfArtist = id) }}>Edit Artist</a></li>
+  </ul>
+</div>
+<div class="container">
+  <div class="row">
     {% for i in items %}
-    <div>
-      <p>{{i.title}}</p>
-      <p>{{i.year}}</p>
-      <img src="{{i.image_link}}" alt="{{i.title}}" height="50%" />
-      <br>
-      <a href={{ url_for('deleteArtWork', idOfArt = i.id) }}>Delete this work</a>
-      <a href={{ url_for('editArtWork', idOfArt = i.id) }}>Edit this work</a>
-      <br>
-    </div>
+      <div class="col-sm-6">
+        <img src="{{i.image_link}}" alt="{{i.title}}" />
+        <p>{{i.title}}</p>
+        <p>{{i.year}}</p>
+        <a href={{ url_for('deleteArtWork', idOfArt = i.id) }}>Delete this work</a>
+        <a class="right" href={{ url_for('editArtWork', idOfArt = i.id) }}>Edit this work</a>
+        <br>
+      </div>
     {% endfor %}
+  </div>
+</div>
+<a class="btn btn-default add-artist" href={{ url_for('addArtWork', idOfArtist = id) }} role="button">Add an Art Work</a>
 {% endblock %}

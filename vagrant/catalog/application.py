@@ -3,6 +3,7 @@ app = Flask(__name__)
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from  sqlalchemy.sql.expression import func, select
 from database_setup import Base, Artist, ArtWork
 
 engine = create_engine('sqlite:///artistwork.db')
@@ -15,7 +16,8 @@ session = DBSession()
 @app.route('/artists/')
 def showArtists():
   items = session.query(Artist).all()
-  return render_template('artists.html', items = items)
+  work = session.query(ArtWork).order_by(func.random()).first()
+  return render_template('artists.html', items = items, image = work.image_link, title = work.title)
 
 # Add a new artist
 @app.route('/artists/add_artist/', methods=['GET', 'POST'])
@@ -51,7 +53,8 @@ def editArtist(idOfArtist):
     artist.name = request.form['name']
     session.add(artist)
     session.commit()
-    return redirect(url_for('showArtists'))
+    items = session.query(ArtWork).filter_by(artist_id = idOfArtist)
+    return redirect(url_for('showArtistDetails', idOfArtist = idOfArtist))
   else:
     return render_template('edit_artist.html', id = idOfArtist, name = artist.name)
 
@@ -103,6 +106,7 @@ def editArtWork(idOfArt):
   else:
     return render_template('edit_work.html', title = art.title, id = idOfArt, year = art.year, image = art.image_link)
 
+# JSON API endpoint for a list of works by a specific artist
 @app.route('/artists/<int:idOfArtist>/art_works/JSON')
 def restaurantMenuJSON(idOfArtist):
     items = session.query(ArtWork).filter_by(
