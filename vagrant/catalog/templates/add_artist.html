@@ -1,8 +1,13 @@
 {% extends "main.html" %}
 {% block content %}
-		<h2>ADD AN ARTIST!</h2>
-		<form method="POST" action="{{ url_for('addArtist')}}">
-			<input type="text" name="artist_name">
-			<input type="submit">
-		</form>
+{% include "header.html" %}
+<h2>ADD AN ARTIST</h2>
+<form method="POST" action="{{ url_for('addArtist')}}">
+	<div class="form-group">
+		<label>Artist Name</label>
+		<input type="text" class="form-control" name="artist_name" placeholder="Name">
+	</div>
+	<br>
+	<input type="submit" class="btn btn-default" value="Submit">
+</form>
 {% endblock %}

@@ -2,9 +2,13 @@
 	font-family: "Helvetica Neue Bold", Roboto, Helvetica, Arial, sans-serif;
 }
 
+body { 
+	padding-top: 70px;
+}
+
 h1 {
 	text-align: center;
-	font-size: 40px;
+	font-size: 25px;
 	font-weight: 700;
 }
 
@@ -79,4 +83,20 @@ li {
 	width: 175px;
 	margin-left: auto;
 	margin-right: auto;
+}
+
+.top-menu {
+	height: 100px;
+	width: 100%;
+	background-color: gray;
+}
+
+.logout {
+	margin-top: 30px;
+	float: right;
+	vertical-align: middle;
+}
+
+.navbar-btn {
+	margin-left: 20px
 }
