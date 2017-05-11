@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
 app = Flask(__name__)
 
 from sqlalchemy import create_engine
@@ -18,6 +18,16 @@ def showArtists():
   items = session.query(Artist).all()
   work = session.query(ArtWork).order_by(func.random()).first()
   return render_template('artists.html', items = items, image = work.image_link, title = work.title)
+
+
+@app.route('/artists/search/', methods=['GET', 'POST'])
+def search():
+  artist = session.query(Artist).filter(Artist.name.ilike(request.form['name'])).first()
+  if artist:
+    return redirect(url_for("showArtistDetails", idOfArtist = artist.id))
+  else:
+    flash("No artist found for " + request.form['name'])
+    return redirect(url_for("showArtists"))
 
 # Add a new artist
 @app.route('/artists/add_artist/', methods=['GET', 'POST'])
@@ -108,11 +118,12 @@ def editArtWork(idOfArt):
 
 # JSON API endpoint for a list of works by a specific artist
 @app.route('/artists/<int:idOfArtist>/art_works/JSON')
-def restaurantMenuJSON(idOfArtist):
+def artWorksJSON(idOfArtist):
     items = session.query(ArtWork).filter_by(
         artist_id=idOfArtist).all()
     return jsonify(ArtistWorks=[i.serialize for i in items])
 
 if __name__ == '__main__':
+  app.secret_key = 'super_secret_key'
   app.debug = True
   app.run(host = '0.0.0.0', port = 5000)

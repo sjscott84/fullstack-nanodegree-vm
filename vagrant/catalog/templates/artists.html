@@ -1,7 +1,16 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
-<h1>Art Saver</h1>
+{% with messages = get_flashed_messages()%}
+  {% if messages %}
+    <ul>
+      {% for message in messages %}
+        <li><strong>{{ message }}</strong></li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+<h1>All Artists</h1>
 <div class='image'>
   <img src="{{image}}" alt="{{title}}" />
   <p class="sub-title">{{title}}</p>

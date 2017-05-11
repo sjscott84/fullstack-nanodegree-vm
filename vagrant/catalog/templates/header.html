@@ -2,6 +2,12 @@
 {% block content %}
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container-fluid">
+    	<form class="navbar-form navbar-left" method="POST" action="{{ url_for('search')}}">
+    		<div class="form-group">
+          		<input type="text" class="form-control" name="name" placeholder="Search for artist">
+        	</div>
+        	<input type="submit" class="btn btn-default" value="Search">
+        </form>
     	<input type="submit" class="btn btn-default navbar-btn right" value="Logout">
     	<form method="GET" action="{{ url_for('showArtists')}}">
     		<input type="submit" class="btn btn-default navbar-btn right" value="Home">
