@@ -4,7 +4,7 @@ app = Flask(__name__)
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from  sqlalchemy.sql.expression import func, select
-from database_setup import Base, Artist, ArtWork
+from database_setup import Base, User, Artist, ArtWork
 
 from flask import session as login_session
 import random, string
@@ -18,7 +18,8 @@ import requests
 
 CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
 
-engine = create_engine('sqlite:///artistwork.db')
+#engine = create_engine('sqlite:///artistwork.db')
+engine = create_engine('sqlite:///artistworkwithuser.db')
 Base.metadata.bind=engine
 DBSession = sessionmaker(bind = engine)
 session = DBSession()
@@ -27,6 +28,24 @@ def makeResponse(message, code):
   response = make_response(json.dumps(message), code)
   response.headers['Content-Type'] = 'application/json'
   return response
+
+def createUser(login_session):
+  newUser = User(name = login_session['username'], email = login_session['email'])
+  session.add(newUser)
+  session.commit()
+  user = session.query(User).filter_by(email = login_session['email']).one()
+  return user.id
+
+def getUserInfo(user_id):
+  user = session.query(User).filter_by(id = user_id).one()
+  return user
+
+def getUserID(email):
+  try:
+    user = session.query(User).filter_by(email = email).one()
+    return user.id
+  except:
+    return None
 
 #Login
 @app.route('/login')
@@ -86,6 +105,11 @@ def gconnect():
     login_session['username'] = data['name']
     login_session['email'] = data['email']
 
+    user_id = getUserID(login_session['email'])
+    if not user_id:
+      user_id = createUser(login_session)
+    login_session['user_id'] = user_id
+
     return 'Done'
   else:
     return redirect(url_for('showLogin'))
@@ -106,6 +130,7 @@ def gdisconnect():
       del login_session['gplus_id']
       del login_session['username']
       del login_session['email']
+      del login_session['user_id']
       return makeResponse('Successfully disconnected', 200)
     else:
       return makeResponse('Failed to revoke token for given user', 400)
@@ -119,7 +144,10 @@ def showArtists():
   user = login_session.get('username')
   items = session.query(Artist).all()
   work = session.query(ArtWork).order_by(func.random()).first()
-  return render_template('artists.html', items = items, image = work.image_link, title = work.title, user = user)
+  if work:
+    return render_template('artists.html', items = items, image = work.image_link, title = work.title, user = user)
+  else:
+    return render_template('artists.html', items = items, user = user)
 
 
 @app.route('/artists/search/', methods=['GET', 'POST'])
@@ -139,7 +167,7 @@ def addArtist():
     return redirect('/login')
   if request.method == 'POST':
     #TODO = make sure artist does not already exist
-    newArtist = Artist(name = request.form['artist_name'])
+    newArtist = Artist(name = request.form['artist_name'], creator_id = login_session['user_id'])
     session.add(newArtist)
     session.commit()
     return redirect(url_for('showArtists'))
@@ -184,7 +212,11 @@ def editArtist(idOfArtist):
 def showArtistDetails(idOfArtist):
   artistFromDB = session.query(Artist).filter_by(id = idOfArtist).one()
   items = session.query(ArtWork).filter_by(artist_id = idOfArtist)
-  return render_template('art_works.html', items = items, name = artistFromDB.name, id = idOfArtist)
+  if artistFromDB.creator_id == login_session['user_id']:
+    return render_template('art_works.html', items = items, name = artistFromDB.name, id = idOfArtist)
+  else:
+    return render_template('public_art_works.html', items = items, name = artistFromDB.name, 
+      id = idOfArtist, user_id = login_session['user_id'])
 
 
 # Add a new work for a particular artist
@@ -195,7 +227,7 @@ def addArtWork(idOfArtist):
     return redirect('/login')
   if request.method == 'POST':
     newArt = ArtWork(title = request.form['title'], year = request.form['year'], 
-      image_link = request.form['image'], artist_id = idOfArtist)
+      image_link = request.form['image'], artist_id = idOfArtist, creator_id = login_session['user_id'])
     session.add(newArt)
     session.commit()
     return redirect(url_for('showArtistDetails', idOfArtist = idOfArtist))

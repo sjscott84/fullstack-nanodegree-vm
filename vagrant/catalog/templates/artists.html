@@ -12,10 +12,12 @@
 {% endwith %}
 <h1>All Artists</h1>
 <!--<h1>Hello {{user}}</h1>-->
-<div class='image'>
-  <img src="{{image}}" alt="{{title}}" />
-  <p class="sub-title">{{title}}</p>
-</div>
+{% if image %}
+  <div class='image'>
+    <img src="{{image}}" alt="{{title}}" />
+    <p class="sub-title">{{title}}</p>
+  </div>
+{% endif %}
 <div class="container center">
   <div class="row">
     {% for i in items %}

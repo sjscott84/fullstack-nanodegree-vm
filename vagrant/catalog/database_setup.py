@@ -5,12 +5,21 @@ from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
+class User(Base):
 
+  __tablename__ = 'user'
+
+  id = Column(Integer, primary_key = True)
+  name = Column(String(80), nullable = False)
+  email = Column(String(80), nullable = False)
+  
 class Artist(Base):
 
   __tablename__ = 'artist'
   name = Column(String(80), nullable = False)
   id = Column(Integer, primary_key = True)
+  creator_id = Column(Integer, ForeignKey('user.id'))
+  creator = relationship(User)
 
 
 class ArtWork(Base):
@@ -23,6 +32,8 @@ class ArtWork(Base):
   image_link = Column(String(250))
   artist_id = Column(Integer, ForeignKey('artist.id'))
   artist = relationship(Artist)
+  creator_id = Column(Integer, ForeignKey('user.id'))
+  creator = relationship(User)
 
   @property
   def serialize(self):
@@ -34,8 +45,10 @@ class ArtWork(Base):
         'image_link': self.image_link,
     }
 
+#engine = create_engine(
+  #'sqlite:///artistwork.db')
 
 engine = create_engine(
-  'sqlite:///artistwork.db')
+  'sqlite:///artistworkwithuser.db')
 
 Base.metadata.create_all(engine)
