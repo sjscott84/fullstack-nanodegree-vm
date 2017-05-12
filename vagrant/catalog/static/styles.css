@@ -100,3 +100,8 @@ li {
 .navbar-btn {
 	margin-left: 20px
 }
+
+.login {
+	margin-top: -20px;
+	margin-bottom: 50px;
+}

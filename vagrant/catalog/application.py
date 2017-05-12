@@ -6,18 +6,120 @@ from sqlalchemy.orm import sessionmaker
 from  sqlalchemy.sql.expression import func, select
 from database_setup import Base, Artist, ArtWork
 
+from flask import session as login_session
+import random, string
+
+from oauth2client.client import flow_from_clientsecrets
+from oauth2client.client import FlowExchangeError
+import httplib2
+import json
+from flask import make_response
+import requests
+
+CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
+
 engine = create_engine('sqlite:///artistwork.db')
 Base.metadata.bind=engine
 DBSession = sessionmaker(bind = engine)
 session = DBSession()
 
+def makeResponse(message, code):
+  response = make_response(json.dumps(message), code)
+  response.headers['Content-Type'] = 'application/json'
+  return response
+
+#Login
+@app.route('/login')
+def showLogin():
+  state = ''.join(random.choice(string.ascii_uppercase + string.
+    digits) for x in xrange(32))
+  login_session['state'] = state
+  return render_template('login.html', STATE=state)
+
+@app.route('/gconnect', methods=['GET', 'POST'])
+def gconnect():
+  if request.method == 'POST':
+    #Validate state token
+    if request.args.get('state') != login_session['state']:
+      return makeResponse('Invalid state parameter', 401)
+    #Get authorization code
+    code = request.data
+    try:
+      #Upgrade the authorization code into a credentials object
+      oauth_flow = flow_from_clientsecrets('client_secrets.json', scope='')
+      oauth_flow.redirect_uri = 'postmessage'
+      credentials = oauth_flow.step2_exchange(code)
+    except FlowExchangeError:
+      return makeResponse('Failed to upgrade the authorization code.', 401)
+
+    #Check that access token is valid
+    access_token = credentials.access_token
+    url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s' % access_token)
+    h = httplib2.Http()
+    result = json.loads(h.request(url, 'GET')[1])
+    if result.get('error') is not None:
+      return makeResponse(result.get('error'), 50)
+
+    #Verfiy that the access token is used for the intended user
+    gplus_id = credentials.id_token['sub']
+    if result['user_id'] != gplus_id:
+      return makeResponse("Token's user ID doesn't match given user ID", 401)
+
+    #Verify that the access token is valid for this app
+    if result['issued_to'] != CLIENT_ID:
+      return makeResponse("Token's client ID does not match apps", 401)
+    stored_credentials = login_session.get('access_token')
+    stored_gplus_id = login_session.get('gplus_id')
+    if stored_credentials is not None and gplus_id == stored_gplus_id:
+      return makeResponse('Current user is already connected', 200)
+
+    #Store the access token in the session for later use
+    login_session['access_token'] = credentials.access_token
+    login_session['gplus_id'] = gplus_id
+
+    #Get user info
+    userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
+    params = params = {'access_token': credentials.access_token, 'alt': 'json'}
+    answer = requests.get(userinfo_url, params = params)
+    data = answer.json()
+
+    login_session['username'] = data['name']
+    login_session['email'] = data['email']
+
+    return 'Done'
+  else:
+    return redirect(url_for('showLogin'))
+
+@app.route('/gdisconnect', methods=['GET', 'POST'])
+def gdisconnect():
+  if request.method == "POST":
+    access_token = login_session.get('access_token')
+    if access_token is None:
+      return makeResponse('Current User is not connected', 401)
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
+    h = httplib2.Http()
+    result, content = h.request(url, 'GET')
+    error = json.loads(content)
+    #if result['status'] == '200' or error['error'] == 'invalid_token':
+    if result['status'] == '200':
+      del login_session['access_token']
+      del login_session['gplus_id']
+      del login_session['username']
+      del login_session['email']
+      return makeResponse('Successfully disconnected', 200)
+    else:
+      return makeResponse('Failed to revoke token for given user', 400)
+  else:
+    return render_template('logout.html')
+
 #main page - displays a list of artists
 @app.route('/')
 @app.route('/artists/')
 def showArtists():
+  user = login_session.get('username')
   items = session.query(Artist).all()
   work = session.query(ArtWork).order_by(func.random()).first()
-  return render_template('artists.html', items = items, image = work.image_link, title = work.title)
+  return render_template('artists.html', items = items, image = work.image_link, title = work.title, user = user)
 
 
 @app.route('/artists/search/', methods=['GET', 'POST'])
@@ -32,6 +134,9 @@ def search():
 # Add a new artist
 @app.route('/artists/add_artist/', methods=['GET', 'POST'])
 def addArtist():
+  if 'username' not in login_session:
+    flash("You need to login to add an artist")
+    return redirect('/login')
   if request.method == 'POST':
     #TODO = make sure artist does not already exist
     newArtist = Artist(name = request.form['artist_name'])
@@ -44,6 +149,9 @@ def addArtist():
 # Delete a particular artist
 @app.route('/artists/<int:idOfArtist>/delete_artist', methods=['GET', 'POST'])
 def deleteArtist(idOfArtist):
+  if 'username' not in login_session:
+    flash("You need to login to delete an artist")
+    return redirect('/login')
   artist = session.query(Artist).filter_by(id = idOfArtist).one()
   artist_works = session.query(ArtWork).filter_by(artist_id = idOfArtist).all()
   if request.method == 'POST':
@@ -58,6 +166,9 @@ def deleteArtist(idOfArtist):
 # Edit a particular artist
 @app.route('/artists/<int:idOfArtist>/edit_artist', methods=['GET', 'POST'])
 def editArtist(idOfArtist):
+  if 'username' not in login_session:
+    flash("You need to login to edit an artist")
+    return redirect('/login')
   artist = session.query(Artist).filter_by(id = idOfArtist).one()
   if request.method == 'POST':
     artist.name = request.form['name']
@@ -79,6 +190,9 @@ def showArtistDetails(idOfArtist):
 # Add a new work for a particular artist
 @app.route('/artists/<int:idOfArtist>/add_work/', methods=['GET', 'POST'])
 def addArtWork(idOfArtist):
+  if 'username' not in login_session:
+    flash("You need to login to add an art work")
+    return redirect('/login')
   if request.method == 'POST':
     newArt = ArtWork(title = request.form['title'], year = request.form['year'], 
       image_link = request.form['image'], artist_id = idOfArtist)
@@ -93,6 +207,9 @@ def addArtWork(idOfArtist):
 # Delete a work by a particular artist
 @app.route('/artists/<int:idOfArt>/delete_work/', methods=['GET', 'POST'])
 def deleteArtWork(idOfArt):
+  if 'username' not in login_session:
+    flash("You need to login to delete an art work")
+    return redirect('/login')
   art = session.query(ArtWork).filter_by(id = idOfArt).one()
   if request.method == 'POST':
     session.delete(art)
@@ -105,6 +222,9 @@ def deleteArtWork(idOfArt):
 # Edit an entry about a peice of work
 @app.route('/artists/<int:idOfArt>/edit_work/', methods=['GET', 'POST'])
 def editArtWork(idOfArt):
+  if 'username' not in login_session:
+    flash("You need to login to edit an art work")
+    return redirect('/login')
   art = session.query(ArtWork).filter_by(id = idOfArt).one()
   if request.method == 'POST':
     art.title = request.form['title']
