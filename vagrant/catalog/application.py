@@ -124,14 +124,15 @@ def gdisconnect():
     h = httplib2.Http()
     result, content = h.request(url, 'GET')
     error = json.loads(content)
-    #if result['status'] == '200' or error['error'] == 'invalid_token':
-    if result['status'] == '200':
+    if result['status'] == '200' or error['error'] == 'invalid_token':
+    #if result['status'] == '200':
       del login_session['access_token']
       del login_session['gplus_id']
       del login_session['username']
       del login_session['email']
       del login_session['user_id']
-      return makeResponse('Successfully disconnected', 200)
+      #return makeResponse('Successfully disconnected', 200)
+      return redirect(url_for("showLogin"))
     else:
       return makeResponse('Failed to revoke token for given user', 400)
   else:
@@ -218,13 +219,12 @@ def editArtist(idOfArtist, nameOfArtist):
 def showArtistDetails(idOfArtist, nameOfArtist):
   artistFromDB = session.query(Artist).filter_by(id = idOfArtist).one()
   items = session.query(ArtWork).filter_by(artist_id = idOfArtist)
-  if artistFromDB.creator_id == login_session['user_id']:
-    return render_template('art_works.html', items = items, name = nameOfArtist, id = idOfArtist)
-  else:
+  if 'username' not in login_session:
     return render_template('public_art_works.html', items = items, name = nameOfArtist, 
+      id = idOfArtist)
+  else:
+    return render_template('art_works.html', items = items, name = nameOfArtist, 
       id = idOfArtist, user_id = login_session['user_id'])
-
-
 # Add a new work for a particular artist
 @app.route('/artists/<int:idOfArtist>/<string:nameOfArtist>/add_work/', methods=['GET', 'POST'])
 def addArtWork(idOfArtist, nameOfArtist):
