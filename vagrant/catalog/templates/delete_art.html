@@ -1,8 +1,24 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
-<h4>Are you sure you want to delete {{title}}?</h4>
-<form method='POST' action="{{ url_for('deleteArtWork', idOfArt = id)}}">
-	<input type="SUBMIT" value="Delete">
-</form>
+{% if creator_id == user_id %}
+	<h4>Are you sure you want to delete {{title}}?</h4>
+	<div class="outer">
+		<div class="inner">
+			<form method='GET' action="{{url_for('showArtistDetails', idOfArtist = idOfArtist, nameOfArtist = name)}}">
+				<input type="SUBMIT" class="btn btn-default" value="Cancel">
+			</form>
+		</div>
+		<div class="inner">
+			<form method='POST' action="{{ url_for('deleteArtWork', idOfArt = id)}}">
+				<input type="SUBMIT" class="btn btn-danger" value="Delete">
+			</form>
+		</div>
+	</div>
+{% else %}
+	<p>Only the user who created the entry for {{title}} can delete it!</p>
+	<form method='GET' action="{{url_for('showArtistDetails', idOfArtist = idOfArtist, nameOfArtist = name)}}">
+		<input type="SUBMIT" class="btn btn-default" value="Cancel">
+	</form>
+{% endif %}
 {% endblock %}

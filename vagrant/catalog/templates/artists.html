@@ -22,7 +22,7 @@
   <div class="row">
     {% for i in items %}
       <div class="col-sm-4 artists">
-        <a class="artists" href={{ url_for('showArtistDetails', idOfArtist = i.id) }}>{{i.name}}</a>
+        <a class="artists" href={{ url_for('showArtistDetails', idOfArtist = i.id, nameOfArtist = i.name) }}>{{i.name}}</a>
         <br>
       </div>
     {% endfor %}

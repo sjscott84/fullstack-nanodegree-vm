@@ -154,7 +154,7 @@ def showArtists():
 def search():
   artist = session.query(Artist).filter(Artist.name.ilike(request.form['name'])).first()
   if artist:
-    return redirect(url_for("showArtistDetails", idOfArtist = artist.id))
+    return redirect(url_for("showArtistDetails", idOfArtist = artist.id, nameOfArtist = artist.name))
   else:
     flash("No artist found for " + request.form['name'])
     return redirect(url_for("showArtists"))
@@ -175,8 +175,10 @@ def addArtist():
     return render_template('add_artist.html')
 
 # Delete a particular artist
-@app.route('/artists/<int:idOfArtist>/delete_artist', methods=['GET', 'POST'])
-def deleteArtist(idOfArtist):
+@app.route('/artists/<int:idOfArtist>/<string:nameOfArtist>/delete_artist', 
+  methods=['GET', 'POST'])
+def deleteArtist(idOfArtist, nameOfArtist):
+  artist = session.query(Artist).filter_by(id = idOfArtist).one()
   if 'username' not in login_session:
     flash("You need to login to delete an artist")
     return redirect('/login')
@@ -189,11 +191,14 @@ def deleteArtist(idOfArtist):
     session.commit()
     return redirect(url_for('showArtists'))
   else:
-    return render_template('delete_artist.html', id = idOfArtist, name = artist.name)
+    return render_template('delete_artist.html', id = idOfArtist, 
+      name = artist.name, creator_id = artist.creator_id, 
+      user_id = login_session['user_id'])
 
 # Edit a particular artist
-@app.route('/artists/<int:idOfArtist>/edit_artist', methods=['GET', 'POST'])
-def editArtist(idOfArtist):
+@app.route('/artists/<int:idOfArtist>/<string:nameOfArtist>/edit_artist', 
+  methods=['GET', 'POST'])
+def editArtist(idOfArtist, nameOfArtist):
   if 'username' not in login_session:
     flash("You need to login to edit an artist")
     return redirect('/login')
@@ -203,25 +208,26 @@ def editArtist(idOfArtist):
     session.add(artist)
     session.commit()
     items = session.query(ArtWork).filter_by(artist_id = idOfArtist)
-    return redirect(url_for('showArtistDetails', idOfArtist = idOfArtist))
+    return redirect(url_for('showArtistDetails', idOfArtist = idOfArtist, nameOfArtist = nameOfArtist))
   else:
-    return render_template('edit_artist.html', id = idOfArtist, name = artist.name)
+    return render_template('edit_artist.html', id = idOfArtist, name = artist.name, 
+      creator_id = artist.creator_id, user_id = login_session['user_id'])
 
 # Show all art works associated with particular artist
-@app.route('/artists/<int:idOfArtist>/', methods=['GET', 'POST'])
-def showArtistDetails(idOfArtist):
+@app.route('/artists/<int:idOfArtist>/<string:nameOfArtist>/', methods=['GET', 'POST'])
+def showArtistDetails(idOfArtist, nameOfArtist):
   artistFromDB = session.query(Artist).filter_by(id = idOfArtist).one()
   items = session.query(ArtWork).filter_by(artist_id = idOfArtist)
   if artistFromDB.creator_id == login_session['user_id']:
-    return render_template('art_works.html', items = items, name = artistFromDB.name, id = idOfArtist)
+    return render_template('art_works.html', items = items, name = nameOfArtist, id = idOfArtist)
   else:
-    return render_template('public_art_works.html', items = items, name = artistFromDB.name, 
+    return render_template('public_art_works.html', items = items, name = nameOfArtist, 
       id = idOfArtist, user_id = login_session['user_id'])
 
 
 # Add a new work for a particular artist
-@app.route('/artists/<int:idOfArtist>/add_work/', methods=['GET', 'POST'])
-def addArtWork(idOfArtist):
+@app.route('/artists/<int:idOfArtist>/<string:nameOfArtist>/add_work/', methods=['GET', 'POST'])
+def addArtWork(idOfArtist, nameOfArtist):
   if 'username' not in login_session:
     flash("You need to login to add an art work")
     return redirect('/login')
@@ -230,7 +236,7 @@ def addArtWork(idOfArtist):
       image_link = request.form['image'], artist_id = idOfArtist, creator_id = login_session['user_id'])
     session.add(newArt)
     session.commit()
-    return redirect(url_for('showArtistDetails', idOfArtist = idOfArtist))
+    return redirect(url_for('showArtistDetails', idOfArtist = idOfArtist, nameOfArtist = nameOfArtist))
   else:
     artistFromDB = session.query(Artist).filter_by(id = idOfArtist).one()
     return render_template('add_art_work.html', name = artistFromDB.name, id = idOfArtist)
@@ -243,12 +249,15 @@ def deleteArtWork(idOfArt):
     flash("You need to login to delete an art work")
     return redirect('/login')
   art = session.query(ArtWork).filter_by(id = idOfArt).one()
+  artist = session.query(Artist).filter_by(id = art.artist_id).one()
   if request.method == 'POST':
     session.delete(art)
     session.commit()
-    return redirect(url_for('showArtistDetails', idOfArtist = art.artist_id))
+    return redirect(url_for('showArtistDetails', idOfArtist = art.artist_id, nameOfArtist = artist.name))
   else:
-    return render_template('delete_art.html', title = art.title, id = idOfArt)
+    return render_template('delete_art.html', title = art.title, id = idOfArt,
+     name = artist.name, idOfArtist = art.artist_id,
+     creator_id = art.creator_id, user_id = login_session['user_id'])
 
 
 # Edit an entry about a peice of work
@@ -258,15 +267,19 @@ def editArtWork(idOfArt):
     flash("You need to login to edit an art work")
     return redirect('/login')
   art = session.query(ArtWork).filter_by(id = idOfArt).one()
+  artist = session.query(Artist).filter_by(id = art.artist_id).one()
   if request.method == 'POST':
     art.title = request.form['title']
     art.year = request.form['year']
     art.image_link = request.form['image']
     session.add(art)
     session.commit()
-    return redirect(url_for('showArtistDetails', idOfArtist = art.artist_id))
+    return redirect(url_for('showArtistDetails', idOfArtist = art.artist_id, nameOfArtist = artist.name))
   else:
-    return render_template('edit_work.html', title = art.title, id = idOfArt, year = art.year, image = art.image_link)
+    return render_template('edit_work.html', title = art.title, id = idOfArt, 
+      year = art.year, image = art.image_link,
+      creator_id = art.creator_id, user_id = login_session['user_id'],
+      idOfArtist = art.artist_id, nameOfArtist = artist.name)
 
 # JSON API endpoint for a list of works by a specific artist
 @app.route('/artists/<int:idOfArtist>/art_works/JSON')

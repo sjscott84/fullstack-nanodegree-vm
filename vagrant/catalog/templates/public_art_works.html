@@ -16,5 +16,5 @@
     </div>
   {% endfor %}
 </div>
-<a class="btn btn-default add-artist" href={{ url_for('addArtWork', idOfArtist = id) }} role="button">Add an Art Work</a>
+<a class="btn btn-default add-artist" href={{ url_for('addArtWork', idOfArtist = id, nameOfArtist = name) }} role="button">Add an Art Work</a>
 {% endblock %}

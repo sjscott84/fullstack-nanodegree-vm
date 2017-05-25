@@ -2,7 +2,7 @@
 {% block content %}
 {% include "header.html" %}
 <h2>Add an art work for {{name}}</h2>
-<form method="POST" action="{{ url_for('addArtWork', idOfArtist = id)}}">
+<form method="POST" action="{{ url_for('addArtWork', idOfArtist = id, nameOfArtist = name)}}">
 	<div class="form-group">
 		<label>Title</label>
 		<input type="text" class="form-control" name="title" placeholder="Title">

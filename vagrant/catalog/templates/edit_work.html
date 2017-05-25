@@ -1,19 +1,26 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
-<h2>Edit {{title}}</h2>
-<form method="POST" action="{{ url_for('editArtWork', idOfArt = id)}}">
-	<div class="form-group">
-		<label>Title</label>
-		<input type="text" class="form-control" name="title" value="{{title}}">
+{% if creator_id == user_id %}
+	<h2>Edit {{title}}</h2>
+	<form method="POST" action="{{ url_for('editArtWork', idOfArt = id)}}">
+		<div class="form-group">
+			<label>Title</label>
+			<input type="text" class="form-control" name="title" value="{{title}}">
+			<br>
+			<label>Year</label>
+			<input type="text" class="form-control" name="year" value="{{year}}">
+			<br>
+			<label>Image Link</label>
+			<input type="text" class="form-control" name="image" value="{{image}}">
+		<div>
 		<br>
-		<label>Year</label>
-		<input type="text" class="form-control" name="year" value="{{year}}">
-		<br>
-		<label>Image Link</label>
-		<input type="text" class="form-control" name="image" value="{{image}}">
-	<div>
-	<br>
-	<input type="submit" class="btn btn-default" value="Submit">
-</form>
+		<input type="submit" class="btn btn-default" value="Submit">
+	</form>
+{% else %}
+	<p>Only the user who created the entry for {{title}} can edit it!</p>
+	<form method='GET' action="{{url_for('showArtistDetails', idOfArtist = idOfArtist, nameOfArtist = nameOfArtist)}}">
+		<input type="SUBMIT" class="btn btn-default" value="Cancel">
+	</form>
+{% endif %}
 {% endblock %}

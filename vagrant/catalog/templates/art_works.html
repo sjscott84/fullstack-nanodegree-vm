@@ -4,8 +4,8 @@
 <h1>{{name}}</h1>
 <div class="links">
   <ul>
-    <li><a href={{ url_for('deleteArtist', idOfArtist = id) }}>Delete Artist</a></li>
-    <li><a class="right" href={{ url_for('editArtist', idOfArtist = id) }}>Edit Artist</a></li>
+    <li><a href={{ url_for('deleteArtist', idOfArtist = id, nameOfArtist = name) }}>Delete Artist</a></li>
+    <li><a class="right" href={{ url_for('editArtist', idOfArtist = id, nameOfArtist = name) }}>Edit Artist</a></li>
   </ul>
 </div>
 <div class="row">
@@ -20,5 +20,5 @@
     </div>
   {% endfor %}
 </div>
-<a class="btn btn-default add-artist" href={{ url_for('addArtWork', idOfArtist = id) }} role="button">Add an Art Work</a>
+<a class="btn btn-default add-artist" href={{ url_for('addArtWork', idOfArtist = id, nameOfArtist = name) }} role="button">Add an Art Work</a>
 {% endblock %}

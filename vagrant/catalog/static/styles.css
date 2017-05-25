@@ -105,3 +105,11 @@ li {
 	margin-top: -20px;
 	margin-bottom: 50px;
 }
+
+.outer {
+	width:100%;
+}
+
+.inner {
+	display: inline-block;
+}
