@@ -25,6 +25,18 @@ Exit psql by entering \q.
 
 ## Running tournament project
 
-CD into tournament and enter 'python tournament_test.py' to run the tests for this project.
+CD into tournament and enter 'python tournament_test.py' to run the tests for this project.  
+
+## Creating a database for the catalog project  
+
+CD into catalog.  
+To create a database enter 'python database_setup.py'.  This will create a new database called artistworkwithuser.db inside the catalog folder.  
+
+## Running catalog project  
+
+CD into catalog and enter 'python application.py'.  
+You can then view this project at localhost:5000.
+If port 5000 is unavailable you can change the port in line 355 in application.py.
+
 
 
