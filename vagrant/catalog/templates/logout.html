@@ -1,7 +1,7 @@
 {% extends "main.html" %}
 {% block content %}
-	<h4>Are you sure you want to logout?</h4>
-	<form method='POST' action="{{ url_for('gdisconnect')}}">
-		<input type="SUBMIT" class="btn btn-danger" value="Logout">
-	</form>
+    <h4>Are you sure you want to logout?</h4>
+    <form method='POST' action="{{ url_for('gdisconnect')}}">
+        <input type="SUBMIT" class="btn btn-danger" value="Logout">
+    </form>
 {% endblock %}

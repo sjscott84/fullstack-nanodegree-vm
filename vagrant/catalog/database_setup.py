@@ -5,48 +5,45 @@ from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
+
 class User(Base):
+    __tablename__ = 'user'
 
-  __tablename__ = 'user'
+    id = Column(Integer, primary_key = True)
+    name = Column(String(80), nullable = False)
+    email = Column(String(80), nullable = False)
 
-  id = Column(Integer, primary_key = True)
-  name = Column(String(80), nullable = False)
-  email = Column(String(80), nullable = False)
-  
+
 class Artist(Base):
+    __tablename__ = 'artist'
 
-  __tablename__ = 'artist'
-  name = Column(String(80), nullable = False)
-  id = Column(Integer, primary_key = True)
-  creator_id = Column(Integer, ForeignKey('user.id'))
-  creator = relationship(User)
+    name = Column(String(80), nullable = False)
+    id = Column(Integer, primary_key = True)
+    creator_id = Column(Integer, ForeignKey('user.id'))
+    creator = relationship(User)
 
 
 class ArtWork(Base):
+    __tablename__ = 'art_work'
 
-  __tablename__ = 'art_work'
+    title = Column(String(80), nullable = False)
+    id = Column(Integer, primary_key = True)
+    year = Column(String(250))
+    image_link = Column(String(250))
+    artist_id = Column(Integer, ForeignKey('artist.id'))
+    artist = relationship(Artist)
+    creator_id = Column(Integer, ForeignKey('user.id'))
+    creator = relationship(User)
 
-  title = Column(String(80), nullable = False)
-  id = Column(Integer, primary_key = True)
-  year = Column(String(250))
-  image_link = Column(String(250))
-  artist_id = Column(Integer, ForeignKey('artist.id'))
-  artist = relationship(Artist)
-  creator_id = Column(Integer, ForeignKey('user.id'))
-  creator = relationship(User)
-
-  @property
-  def serialize(self):
-    """Return object data in easily serializeable format"""
-    return {
-        'title': self.title,
-        'id': self.id,
-        'year': self.year,
-        'image_link': self.image_link,
-    }
-
-#engine = create_engine(
-  #'sqlite:///artistwork.db')
+    @property
+    def serialize(self):
+        """Return object data in easily serializeable format"""
+        return {
+            'title': self.title,
+            'id': self.id,
+            'year': self.year,
+            'image_link': self.image_link,
+        }
 
 engine = create_engine(
   'sqlite:///artistworkwithuser.db')

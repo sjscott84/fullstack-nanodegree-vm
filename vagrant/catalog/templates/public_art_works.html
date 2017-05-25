@@ -1,16 +1,16 @@
 {% extends "main.html" %}
 {% block content %}
-{% include "header.html" %}
-<h1>{{name}}</h1>
-<div class="row">
-  {% for i in items %}
-    <div class="col-sm-6">
-      <img src="{{i.image_link}}" alt="{{i.title}}" />
-      <p>{{i.title}}</p>
-      <p>{{i.year}}</p>
-      <br>
+    {% include "header.html" %}
+    <h1>{{name}}</h1>
+    <div class="row">
+        {% for i in items %}
+            <div class="col-sm-6">
+                <img src="{{i.image_link}}" alt="{{i.title}}" />
+                <p>{{i.title}}</p>
+                <p>{{i.year}}</p>
+                <br>
+            </div>
+        {% endfor %}
     </div>
-  {% endfor %}
-</div>
-<a class="btn btn-default add-artist" href={{ url_for('addArtWork', idOfArtist = id, nameOfArtist = name) }} role="button">Add an Art Work</a>
+    <a class="btn btn-default add-artist" href={{ url_for('addArtWork', idOfArtist = id, nameOfArtist = name) }} role="button">Add an Art Work</a>
 {% endblock %}
