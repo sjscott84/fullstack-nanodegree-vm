@@ -28,7 +28,7 @@ img {
 
 .image {
 	display:block;
-	margin-top: 30px;
+	margin-top: 50px;
 	margin-left: auto;
 	margin-right: auto;
 	height: 250px;
@@ -116,4 +116,9 @@ li {
 
 .right-link {
 	margin-left: 15px;
+	margin-bottom: 30px;
+}
+
+.row {
+	margin-top: 30px;
 }
