@@ -224,7 +224,9 @@ def showArtistDetails(idOfArtist, nameOfArtist):
       id = idOfArtist)
   else:
     return render_template('art_works.html', items = items, name = nameOfArtist, 
-      id = idOfArtist, user_id = login_session['user_id'])
+      id = idOfArtist, user_id = login_session['user_id'],
+      creator_id = artistFromDB.creator_id)
+    
 # Add a new work for a particular artist
 @app.route('/artists/<int:idOfArtist>/<string:nameOfArtist>/add_work/', methods=['GET', 'POST'])
 def addArtWork(idOfArtist, nameOfArtist):

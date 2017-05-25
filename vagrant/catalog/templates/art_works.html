@@ -2,6 +2,12 @@
 {% block content %}
 {% include "header.html" %}
 <h1>{{name}}</h1>
+{% if creator_id == user_id %}
+  <div class='center'>
+    <a href={{ url_for('deleteArtist', idOfArtist = id, nameOfArtist = name) }}>Delete Artist</a>
+    <a class="right-link" href={{ url_for('editArtist', idOfArtist = id, nameOfArtist = name) }}>Edit Artist</a>
+  </div>
+{% endif %}
 <div class="row">
   {% for i in items %}
     <div class="col-sm-6">

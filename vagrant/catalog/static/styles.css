@@ -113,3 +113,7 @@ li {
 .inner {
 	display: inline-block;
 }
+
+.right-link {
+	margin-left: 15px;
+}
