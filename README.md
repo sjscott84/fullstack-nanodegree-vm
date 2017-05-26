@@ -36,7 +36,13 @@ To create a database enter 'python database_setup.py'.  This will create a new d
 
 CD into catalog and enter 'python application.py'.  
 You can then view this project at localhost:5000.
-If port 5000 is unavailable you can change the port in line 355 in application.py.
+If port 5000 is unavailable you can change the port in line 355 in application.py.  
+
+## Get Google Client ID and Client Secret  
+
+In order for the google user authentication to work you will need to create a Google API console project and a client ID and client secret.  Instructions on how to do this can be found at https://developers.google.com/identity/sign-in/web/devconsole-project.  
+
+Once project and client ID is created download the JSON file and save into the catalog project file and call it client_secrets.json.
 
 
 
