@@ -14,18 +14,7 @@ To run this program you will need to have the following installed:
 Clone this GitHub repository and save to your local machine.  
 CD into project and then the vagrant folder in this project.  
 In the terminal enter 'vagrant up' and once done enter 'vagrant ssh'.  
-CD into /vagrant to enter the virtual machine.  
-
-## Creating a database for the tournament project 
-
-To create a database enter psql in the terminal and then enter 'create database tournament;'.  
-To connect to the database enter \c tournament.  
-You can then create the tables by entering \i tournament.sql.  
-Exit psql by entering \q.  
-
-## Running tournament project
-
-CD into tournament and enter 'python tournament_test.py' to run the tests for this project.  
+CD into /vagrant to enter the virtual machine.   
 
 ## Creating a database for the catalog project  
 
@@ -42,7 +31,18 @@ If port 5000 is unavailable you can change the port in line 355 in application.p
 
 In order for the google user authentication to work you will need to create a Google API console project and a client ID and client secret.  Instructions on how to do this can be found at https://developers.google.com/identity/sign-in/web/devconsole-project.  
 
-Once project and client ID is created download the JSON file and save into the catalog project file and call it client_secrets.json.
+Once project and client ID is created download the JSON file and save into the catalog project file and call it client_secrets.json.  
+
+## Creating a database for the tournament project 
+
+To create a database enter psql in the terminal and then enter 'create database tournament;'.  
+To connect to the database enter \c tournament.  
+You can then create the tables by entering \i tournament.sql.  
+Exit psql by entering \q.  
+
+## Running tournament project
+
+CD into tournament and enter 'python tournament_test.py' to run the tests for this project. 
 
 
 
