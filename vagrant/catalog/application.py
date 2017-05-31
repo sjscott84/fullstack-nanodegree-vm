@@ -7,12 +7,12 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql.expression import func, select
 from database_setup import Base, User, Artist, ArtWork
 
-from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
+from oauth2client.client import flow_from_clientsecrets
+from oauth2client.client import FlowExchangeError
 
-import random
-import string
-import requests
+import random, string
 import httplib2
+import requests
 import json
 
 app = Flask(__name__)
@@ -32,7 +32,6 @@ def makeResponse(message, code):
     response.headers['Content-Type'] = 'application/json'
     return response
 
-
 # Create a user in the database
 def createUser(login_session):
     newUser = User(name = login_session['username'],
@@ -43,7 +42,6 @@ def createUser(login_session):
       email = login_session['email']).one()
     return user.id
 
-
 # Return the id for a logged in user
 def getUserID(email):
     try:
@@ -53,23 +51,21 @@ def getUserID(email):
         return None
 
 
-# Login
+# Create a random string for login state and render the login screen
 @app.route('/login')
 def showLogin():
-    state = ''.join(random.choice(string.ascii_uppercase +
-      string.digits) for x in xrange(32))
+    state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
     login_session['state'] = state
     return render_template('login.html', STATE=state)
 
 
-# Autenticate user
+# Autenticate user with google
 @app.route('/gconnect', methods=['GET', 'POST'])
 def gconnect():
     if request.method == 'POST':
         # Validate state token
         if request.args.get('state') != login_session['state']:
             return makeResponse('Invalid state parameter', 401)
-
         # Get authorization code
         code = request.data
         try:
@@ -84,8 +80,8 @@ def gconnect():
 
         # Check that access token is valid
         access_token = credentials.access_token
-        url = ('https://www.googleapis.com/oauth2/v1/tokeninfo? \
-          access_token=%s' % access_token)
+        url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'\
+            % access_token)
         h = httplib2.Http()
         result = json.loads(h.request(url, 'GET')[1])
 
@@ -132,7 +128,7 @@ def gconnect():
         return redirect(url_for('showLogin'))
 
 
-# Logout user
+# Logout user using google
 @app.route('/gdisconnect', methods=['GET', 'POST'])
 def gdisconnect():
     if request.method == "POST":
@@ -146,7 +142,6 @@ def gdisconnect():
         result, content = h.request(url, 'GET')
         error = json.loads(content)
 
-        # TODO: Why do I keep losing the token??
         if result['status'] == '200' or error['error'] == 'invalid_token':
             # if result['status'] == '200':
             del login_session['access_token']
@@ -169,6 +164,9 @@ def showArtists():
     user = login_session.get('username')
     items = session.query(Artist).all()
     work = session.query(ArtWork).order_by(func.random()).first()
+
+    # This ensures the page still renders even if no art works have
+    # been saved to the database
     if work:
         return render_template('artists.html', items = items,
           image = work.image_link, title = work.title, user = user)
@@ -193,17 +191,27 @@ def search():
 # Add a new artist
 @app.route('/artists/add_artist/', methods=['GET', 'POST'])
 def addArtist():
+    user = login_session.get('username')
+    # Only a logged in user can add an artist
     if 'username' not in login_session:
         flash("You need to login to add an artist")
         return redirect('/login')
 
     if request.method == 'POST':
-        # TODO = make sure artist does not already exist
-        newArtist = Artist(name = request.form['artist_name'],
-          creator_id = login_session['user_id'])
-        session.add(newArtist)
-        session.commit()
-        return redirect(url_for('showArtists'))
+        # Make sure an entry for artist does not already exist before
+        # creating
+        exisitingArtist = session.query(Artist).filter(Artist.name.ilike(
+          request.form['artist_name'])).first()
+        if not exisitingArtist:
+            newArtist = Artist(name = request.form['artist_name'],
+              creator_id = login_session['user_id'])
+            session.add(newArtist)
+            session.commit()
+            return redirect(url_for('showArtists'))
+        else:
+            flash("This artist already exists")
+            return redirect(url_for('showArtistDetails',
+              idOfArtist = exisitingArtist.id, nameOfArtist = exisitingArtist.name))
     else:
         return render_template('add_artist.html')
 
@@ -212,11 +220,7 @@ def addArtist():
 @app.route('/artists/<int:idOfArtist>/<string:nameOfArtist>/delete_artist',
   methods=['GET', 'POST'])
 def deleteArtist(idOfArtist, nameOfArtist):
-    artist = session.query(Artist).filter_by(id = idOfArtist).one()
-    if 'username' not in login_session:
-        flash("You need to login to delete an artist")
-        return redirect('/login')
-
+    user = login_session.get('username')
     artist = session.query(Artist).filter_by(id = idOfArtist).one()
     artist_works = session.query(ArtWork).filter_by(artist_id = idOfArtist)\
       .all()
@@ -237,10 +241,7 @@ def deleteArtist(idOfArtist, nameOfArtist):
 @app.route('/artists/<int:idOfArtist>/<string:nameOfArtist>/edit_artist',
   methods=['GET', 'POST'])
 def editArtist(idOfArtist, nameOfArtist):
-    if 'username' not in login_session:
-        flash("You need to login to edit an artist")
-        return redirect('/login')
-
+    user = login_session.get('username')
     artist = session.query(Artist).filter_by(id = idOfArtist).one()
 
     if request.method == 'POST':
@@ -260,9 +261,13 @@ def editArtist(idOfArtist, nameOfArtist):
 @app.route('/artists/<int:idOfArtist>/<string:nameOfArtist>/',
   methods=['GET', 'POST'])
 def showArtistDetails(idOfArtist, nameOfArtist):
+    user = login_session.get('username')
     artistFromDB = session.query(Artist).filter_by(id = idOfArtist).one()
     items = session.query(ArtWork).filter_by(artist_id = idOfArtist)
 
+    # If user is not logged in only show page with no add. delete or edit options
+    # if user is logged in add, edit or delete options are only shown for items
+    # that user created
     if 'username' not in login_session:
         return render_template('public_art_works.html', items = items,
           name = nameOfArtist, id = idOfArtist)
@@ -277,6 +282,8 @@ def showArtistDetails(idOfArtist, nameOfArtist):
 @app.route('/artists/<int:idOfArtist>/<string:nameOfArtist>/add_work/',
   methods=['GET', 'POST'])
 def addArtWork(idOfArtist, nameOfArtist):
+    user = login_session.get('username')
+    # Only a logged in user can add an art work
     if 'username' not in login_session:
         flash("You need to login to add an art work")
         return redirect('/login')
@@ -298,10 +305,7 @@ def addArtWork(idOfArtist, nameOfArtist):
 # Delete a work by a particular artist
 @app.route('/artists/<int:idOfArt>/delete_work/', methods=['GET', 'POST'])
 def deleteArtWork(idOfArt):
-    if 'username' not in login_session:
-        flash("You need to login to delete an art work")
-        return redirect('/login')
-
+    user = login_session.get('username')
     art = session.query(ArtWork).filter_by(id = idOfArt).one()
     artist = session.query(Artist).filter_by(id = art.artist_id).one()
 
@@ -316,13 +320,10 @@ def deleteArtWork(idOfArt):
           creator_id = art.creator_id, user_id = login_session['user_id'])
 
 
-# Edit an entry about a peice of work
+# Edit an entry about an art work
 @app.route('/artists/<int:idOfArt>/edit_work/', methods=['GET', 'POST'])
 def editArtWork(idOfArt):
-    if 'username' not in login_session:
-        flash("You need to login to edit an art work")
-        return redirect('/login')
-
+    user = login_session.get('username')
     art = session.query(ArtWork).filter_by(id = idOfArt).one()
     artist = session.query(Artist).filter_by(id = art.artist_id).one()
 

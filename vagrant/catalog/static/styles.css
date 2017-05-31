@@ -122,3 +122,9 @@ li {
 .row {
     margin-top: 30px;
 }
+
+@media (max-width: 750px) {
+    body { 
+        padding-top: 150px;
+    }
+}

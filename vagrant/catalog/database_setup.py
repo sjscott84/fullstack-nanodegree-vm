@@ -6,6 +6,7 @@ from sqlalchemy.orm import relationship
 Base = declarative_base()
 
 
+# Creates a table of users
 class User(Base):
     __tablename__ = 'user'
 
@@ -14,6 +15,7 @@ class User(Base):
     email = Column(String(80), nullable = False)
 
 
+# Creates a table of artists
 class Artist(Base):
     __tablename__ = 'artist'
 
@@ -23,6 +25,7 @@ class Artist(Base):
     creator = relationship(User)
 
 
+#Creates a table of artworks
 class ArtWork(Base):
     __tablename__ = 'art_work'
 
@@ -44,6 +47,7 @@ class ArtWork(Base):
             'year': self.year,
             'image_link': self.image_link,
         }
+
 
 engine = create_engine(
   'sqlite:///artistworkwithuser.db')

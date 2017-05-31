@@ -2,6 +2,15 @@
 {% block content %}
     {% include "header.html" %}
     <h1>{{name}}</h1>
+    {% with messages = get_flashed_messages()%}
+        {% if messages %}
+            <ul class="center">
+                {% for message in messages %}
+                    <li><strong>{{ message }}</strong></li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
     {% if creator_id == user_id %}
         <div class='center'>
             <a href={{ url_for('deleteArtist', idOfArtist = id, nameOfArtist = name) }}>Delete Artist</a>
