@@ -216,9 +216,9 @@ def addArtist():
             flash("This artist already exists")
             return redirect(url_for('showArtistDetails',
                 idOfArtist = exisitingArtist.id,
-                nameOfArtist = exisitingArtist.name))
+                nameOfArtist = exisitingArtist.name, user = user))
     else:
-        return render_template('add_artist.html')
+        return render_template('add_artist.html', user = user)
 
 
 # Delete a particular artist
@@ -227,19 +227,19 @@ def addArtist():
 def deleteArtist(idOfArtist, nameOfArtist):
     user = login_session.get('username')
     artist = session.query(Artist).filter_by(id = idOfArtist).one()
-    artist_works = session.query(ArtWork).filter_by(artist_id = idOfArtist)\
-        .all()
+    #artist_works = session.query(ArtWork).filter_by(artist_id = idOfArtist)\
+        #.all()
 
     if request.method == 'POST':
-        for art in artist_works:
-            session.delete(art)
-            session.delete(artist)
-            session.commit()
+        #for art in artist_works:
+            #session.delete(art)
+        session.delete(artist)
+        session.commit()
         return redirect(url_for('showArtists'))
     else:
         return render_template('delete_artist.html', id = idOfArtist,
             name = artist.name, creator_id = artist.creator_id,
-            user_id = login_session['user_id'])
+            user_id = login_session['user_id'], user = user)
 
 
 # Edit a particular artist
@@ -255,11 +255,13 @@ def editArtist(idOfArtist, nameOfArtist):
         session.commit()
         items = session.query(ArtWork).filter_by(artist_id = idOfArtist)
         return redirect(url_for('showArtistDetails',
-            idOfArtist = idOfArtist, nameOfArtist = nameOfArtist))
+            idOfArtist = idOfArtist, nameOfArtist = nameOfArtist,
+            user = user))
     else:
         return render_template('edit_artist.html', id = idOfArtist,
             name = artist.name, creator_id = artist.creator_id,
-            user_id = login_session['user_id'])
+            user_id = login_session['user_id'],
+            user = user)
 
 
 # Show all art works associated with particular artist
@@ -267,6 +269,7 @@ def editArtist(idOfArtist, nameOfArtist):
     methods=['GET', 'POST'])
 def showArtistDetails(idOfArtist, nameOfArtist):
     user = login_session.get('username')
+    print user
     artistFromDB = session.query(Artist).filter_by(id = idOfArtist).one()
     items = session.query(ArtWork).filter_by(artist_id = idOfArtist)
 
@@ -276,12 +279,12 @@ def showArtistDetails(idOfArtist, nameOfArtist):
     # that user created
     if 'username' not in login_session:
         return render_template('public_art_works.html', items = items,
-            name = nameOfArtist, id = idOfArtist)
+            name = nameOfArtist, id = idOfArtist, user = user)
     else:
         return render_template('art_works.html', items = items,
             name = nameOfArtist, id = idOfArtist,
             user_id = login_session['user_id'],
-            creator_id = artistFromDB.creator_id)
+            creator_id = artistFromDB.creator_id, user = user)
 
 
 # Add a new work for a particular artist
@@ -301,11 +304,11 @@ def addArtWork(idOfArtist, nameOfArtist):
         session.add(newArt)
         session.commit()
         return redirect(url_for('showArtistDetails', idOfArtist = idOfArtist,
-            nameOfArtist = nameOfArtist))
+            nameOfArtist = nameOfArtist, user = user))
     else:
         artistFromDB = session.query(Artist).filter_by(id = idOfArtist).one()
         return render_template('add_art_work.html', name = artistFromDB.name,
-            id = idOfArtist)
+            id = idOfArtist, user = user)
 
 
 # Delete a work by a particular artist
@@ -319,11 +322,13 @@ def deleteArtWork(idOfArt):
         session.delete(art)
         session.commit()
         return redirect(url_for('showArtistDetails',
-            idOfArtist = art.artist_id, nameOfArtist = artist.name))
+            idOfArtist = art.artist_id, nameOfArtist = artist.name,
+            user = user))
     else:
         return render_template('delete_art.html', title = art.title,
             id = idOfArt, name = artist.name, idOfArtist = art.artist_id,
-            creator_id = art.creator_id, user_id = login_session['user_id'])
+            creator_id = art.creator_id, user_id = login_session['user_id'],
+            user = user)
 
 
 # Edit an entry about an art work
@@ -340,12 +345,14 @@ def editArtWork(idOfArt):
         session.add(art)
         session.commit()
         return redirect(url_for('showArtistDetails',
-            idOfArtist = art.artist_id, nameOfArtist = artist.name))
+            idOfArtist = art.artist_id, nameOfArtist = artist.name,
+            user = user))
     else:
         return render_template('edit_work.html', title = art.title,
             id = idOfArt, year = art.year, image = art.image_link,
             creator_id = art.creator_id, user_id = login_session['user_id'],
-            idOfArtist = art.artist_id, nameOfArtist = artist.name)
+            idOfArtist = art.artist_id, nameOfArtist = artist.name,
+            user = user)
 
 
 # JSON API endpoint for a list of works by a specific artist
