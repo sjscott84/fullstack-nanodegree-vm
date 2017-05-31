@@ -34,7 +34,7 @@ class ArtWork(Base):
     year = Column(String(250))
     image_link = Column(String(250))
     artist_id = Column(Integer, ForeignKey('artist.id'))
-    artist = relationship(Artist)
+    artist = relationship(Artist, single_parent=True, cascade="all, delete-orphan")
     creator_id = Column(Integer, ForeignKey('user.id'))
     creator = relationship(User)
 

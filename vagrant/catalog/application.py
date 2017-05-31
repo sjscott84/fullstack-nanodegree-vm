@@ -227,12 +227,8 @@ def addArtist():
 def deleteArtist(idOfArtist, nameOfArtist):
     user = login_session.get('username')
     artist = session.query(Artist).filter_by(id = idOfArtist).one()
-    #artist_works = session.query(ArtWork).filter_by(artist_id = idOfArtist)\
-        #.all()
 
     if request.method == 'POST':
-        #for art in artist_works:
-            #session.delete(art)
         session.delete(artist)
         session.commit()
         return redirect(url_for('showArtists'))
