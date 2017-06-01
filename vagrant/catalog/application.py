@@ -328,15 +328,20 @@ def addArtWork(idOfArtist, nameOfArtist):
         return redirect('/login')
 
     if request.method == 'POST':
-        newArt = ArtWork(title=request.form['title'],
-                         year=request.form['year'],
-                         image_link=request.form['image'],
-                         artist_id=idOfArtist,
-                         creator_id=login_session['user_id'])
-        session.add(newArt)
-        session.commit()
-        return redirect(url_for('showArtistDetails', idOfArtist=idOfArtist,
-                                nameOfArtist=nameOfArtist, user=user))
+        artistExists = session.query(Artist).filter_by(id=idOfArtist).one()
+        if artistExists:
+            newArt = ArtWork(title=request.form['title'],
+                             year=request.form['year'],
+                             image_link=request.form['image'],
+                             artist_id=idOfArtist,
+                             creator_id=login_session['user_id'])
+            session.add(newArt)
+            session.commit()
+            return redirect(url_for('showArtistDetails', idOfArtist=idOfArtist,
+                                    nameOfArtist=nameOfArtist, user=user))
+        else:
+            flash("This artist does not exist, create an entry for artist")
+            return redirect(url_for('artists'))
     else:
         artistFromDB = session.query(Artist).filter_by(id=idOfArtist).one()
         return render_template('add_art_work.html', name=artistFromDB.name,
