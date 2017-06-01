@@ -63,6 +63,7 @@ def checkUser(creator_id):
     else:
         return False
 
+
 # Decorator to ensure a user is logged in before able to perform actions
 def loginRequired(func):
     @wraps(func)
@@ -160,7 +161,7 @@ def gconnect():
 @app.route('/gdisconnect', methods=['GET', 'POST'])
 def gdisconnect():
     """
-    Revokes token from Google Sign In API and deletes the session 
+    Revokes token from Google Sign In API and deletes the session
     variable.
     """
     if request.method == "POST":
@@ -401,7 +402,6 @@ def editArtWork(idOfArt):
     art = session.query(ArtWork).filter_by(id=idOfArt).one()
     artist = session.query(Artist).filter_by(id=art.artist_id).one()
 
-
     if request.method == 'POST':
         art.title = request.form['title']
         art.year = request.form['year']
@@ -413,13 +413,6 @@ def editArtWork(idOfArt):
                                 nameOfArtist=artist.name,
                                 user=user))
     else:
-        #if not checkUser(art.creator_id):
-            #flash("Only the creator of " + art.title +" can edit it")
-            #return redirect(url_for('showArtistDetails',
-                            #idOfArtist=art.artist_id,
-                            #nameOfArtist=artist.name,
-                            #user=user))
-        #else:
         return render_template('edit_work.html', title=art.title,
                                id=idOfArt, year=art.year, image=art.image_link,
                                creator_id=art.creator_id,
