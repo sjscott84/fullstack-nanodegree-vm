@@ -25,7 +25,7 @@
                 <p>{{i.year}}</p>
                 {% if i.creator_id == user_id %}
                     <a href={{ url_for('deleteArtWork', idOfArt = i.id) }}>Delete this work</a>
-                    <a class="right" href={{ url_for('editArtWork', idOfArt = i.id) }}>Edit this work</a>
+                    <a class="right" href={{ url_for('editArtWork', idOfArt = i.id, titleOfArt = i.title) }}>Edit this work</a>
                 {% endif %}
                 <br>
             </div>

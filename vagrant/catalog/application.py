@@ -56,14 +56,6 @@ def getUserID(email):
         return None
 
 
-# Check that the currently logged in user is the item creator
-def checkUser(creator_id):
-    if creator_id == login_session['user_id']:
-        return True
-    else:
-        return False
-
-
 # Decorator to ensure a user is logged in before able to perform actions
 def loginRequired(func):
     @wraps(func)
@@ -392,9 +384,9 @@ def deleteArtWork(idOfArt):
 
 
 # Edit an entry about an art work
-@app.route('/artists/<int:idOfArt>/edit_work/', methods=['GET', 'POST'])
+@app.route('/artists/<string:titleOfArt>/<int:idOfArt>/edit_work/', methods=['GET', 'POST'])
 @loginRequired
-def editArtWork(idOfArt):
+def editArtWork(idOfArt, titleOfArt):
     """
     Edits the details of an artwork from ArtWork table in db
     """
@@ -430,6 +422,16 @@ def artWorksJSON(idOfArtist):
     """
     items = session.query(ArtWork).filter_by(artist_id=idOfArtist).all()
     return jsonify(ArtistWorks=[i.serialize for i in items])
+
+
+#JSON API endpoint for details on a partiuclar art work
+@app.route('/artists/<int:idOfArt>/art_work/JSON')
+def artWorkJSON(idOfArt):
+    """
+    Creates a JSON endpoint with data from ArtWork table in db
+    """
+    items = session.query(ArtWork).filter_by(id=idOfArt).one()
+    return jsonify(ArtWork=[items.serialize])
 
 
 if __name__ == '__main__':

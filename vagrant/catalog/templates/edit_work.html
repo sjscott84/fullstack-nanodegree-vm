@@ -3,7 +3,7 @@
     {% include "header.html" %}
     {% if creator_id == user_id %}
         <h2>Edit {{title}}</h2>
-        <form method="POST" action="{{ url_for('editArtWork', idOfArt = id)}}">
+        <form method="POST" action="{{ url_for('editArtWork', idOfArt = id, titleOfArt = title)}}">
             <div class="form-group">
                 <label>Title</label>
                 <input type="text" class="form-control" name="title" value="{{title}}">
