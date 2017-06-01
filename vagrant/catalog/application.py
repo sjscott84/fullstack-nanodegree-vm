@@ -66,6 +66,10 @@ def showLogin():
 # Autenticate user with google
 @app.route('/gconnect', methods=['GET', 'POST'])
 def gconnect():
+    """
+    Gathers data from Google Sign In API and places it inside
+    a session variable.
+    """
     if request.method == 'POST':
         # Validate state token
         if request.args.get('state') != login_session['state']:
@@ -135,6 +139,10 @@ def gconnect():
 # Logout user using google
 @app.route('/gdisconnect', methods=['GET', 'POST'])
 def gdisconnect():
+    """
+    Revokes token from Google Sign In API and deletes the session 
+    variable.
+    """
     if request.method == "POST":
         access_token = login_session.get('access_token')
         if access_token is None:
@@ -165,6 +173,10 @@ def gdisconnect():
 @app.route('/')
 @app.route('/artists/')
 def showArtists():
+    """
+    Retrieves all artists in Artist table of database and displays
+    names
+    """
     user = login_session.get('username')
     items = session.query(Artist).all()
     work = session.query(ArtWork).order_by(func.random()).first()
@@ -183,6 +195,9 @@ def showArtists():
 # Search for an artist
 @app.route('/artists/search/', methods=['GET', 'POST'])
 def search():
+    """
+    Searches the Artist table in db based on search box
+    """
     artist = session.query(Artist).filter(Artist.name.ilike(
       request.form['name'])).first()
     if artist:
@@ -197,6 +212,9 @@ def search():
 # Add a new artist
 @app.route('/artists/add_artist/', methods=['GET', 'POST'])
 def addArtist():
+    """
+    Adds a new artist to the Artist table in db
+    """
     user = login_session.get('username')
     # Only a logged in user can add an artist
     if 'username' not in login_session:
@@ -227,6 +245,10 @@ def addArtist():
 @app.route('/artists/<int:idOfArtist>/<string:nameOfArtist>/delete_artist',
            methods=['GET', 'POST'])
 def deleteArtist(idOfArtist, nameOfArtist):
+    """
+    Deletes an artist from Artist table in db, this also deletes
+    works associated with this artist
+    """
     user = login_session.get('username')
     artist = session.query(Artist).filter_by(id=idOfArtist).one()
 
@@ -244,6 +266,9 @@ def deleteArtist(idOfArtist, nameOfArtist):
 @app.route('/artists/<int:idOfArtist>/<string:nameOfArtist>/edit_artist',
            methods=['GET', 'POST'])
 def editArtist(idOfArtist, nameOfArtist):
+    """
+    Edits the artist details in Artist table in db
+    """
     user = login_session.get('username')
     artist = session.query(Artist).filter_by(id=idOfArtist).one()
 
@@ -267,8 +292,11 @@ def editArtist(idOfArtist, nameOfArtist):
 @app.route('/artists/<int:idOfArtist>/<string:nameOfArtist>/',
            methods=['GET', 'POST'])
 def showArtistDetails(idOfArtist, nameOfArtist):
+    """
+    Retrieves all art works in ArtWork table in db assoicated
+    with an artist
+    """
     user = login_session.get('username')
-    print user
     artistFromDB = session.query(Artist).filter_by(id=idOfArtist).one()
     items = session.query(ArtWork).filter_by(artist_id=idOfArtist)
 
@@ -290,6 +318,9 @@ def showArtistDetails(idOfArtist, nameOfArtist):
 @app.route('/artists/<int:idOfArtist>/<string:nameOfArtist>/add_work/',
            methods=['GET', 'POST'])
 def addArtWork(idOfArtist, nameOfArtist):
+    """
+    Adds an artwork to ArtWork table in db
+    """
     user = login_session.get('username')
     # Only a logged in user can add an art work
     if 'username' not in login_session:
@@ -315,6 +346,9 @@ def addArtWork(idOfArtist, nameOfArtist):
 # Delete a work by a particular artist
 @app.route('/artists/<int:idOfArt>/delete_work/', methods=['GET', 'POST'])
 def deleteArtWork(idOfArt):
+    """
+    Deletes an artwork from ArtWork table in db
+    """
     user = login_session.get('username')
     art = session.query(ArtWork).filter_by(id=idOfArt).one()
     artist = session.query(Artist).filter_by(id=art.artist_id).one()
@@ -337,6 +371,9 @@ def deleteArtWork(idOfArt):
 # Edit an entry about an art work
 @app.route('/artists/<int:idOfArt>/edit_work/', methods=['GET', 'POST'])
 def editArtWork(idOfArt):
+    """
+    Edits the details of an artwork from ArtWork table in db
+    """
     user = login_session.get('username')
     art = session.query(ArtWork).filter_by(id=idOfArt).one()
     artist = session.query(Artist).filter_by(id=art.artist_id).one()
@@ -364,6 +401,9 @@ def editArtWork(idOfArt):
 # JSON API endpoint for a list of works by a specific artist
 @app.route('/artists/<int:idOfArtist>/art_works/JSON')
 def artWorksJSON(idOfArtist):
+    """
+    Creates a JSON endpoint with data from ArtWork table in db
+    """
     items = session.query(ArtWork).filter_by(artist_id=idOfArtist).all()
     return jsonify(ArtistWorks=[i.serialize for i in items])
 
