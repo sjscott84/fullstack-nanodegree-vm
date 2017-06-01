@@ -18,6 +18,7 @@ import httplib2
 import requests
 import json
 
+
 app = Flask(__name__)
 
 CLIENT_ID = json.loads(open('client_secrets.json',
@@ -358,7 +359,8 @@ def addArtWork(idOfArtist, nameOfArtist):
 
 
 # Delete a work by a particular artist
-@app.route('/artists/<int:idOfArt>/delete_work/', methods=['GET', 'POST'])
+@app.route('/artists/<int:idOfArt>/delete_work/',
+           methods=['GET', 'POST'])
 @loginRequired
 def deleteArtWork(idOfArt):
     """
@@ -424,7 +426,7 @@ def artWorksJSON(idOfArtist):
     return jsonify(ArtistWorks=[i.serialize for i in items])
 
 
-#JSON API endpoint for details on a partiuclar art work
+# JSON API endpoint for details on a partiuclar art work
 @app.route('/artists/<int:idOfArt>/art_work/JSON')
 def artWorkJSON(idOfArt):
     """
