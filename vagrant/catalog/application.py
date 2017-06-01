@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, redirect,\
   url_for, jsonify, flash, make_response
 from flask import session as login_session
 
+from functools import wraps
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql.expression import func, select
@@ -52,6 +54,24 @@ def getUserID(email):
         return user.id
     except:
         return None
+
+
+# Check that the currently logged in user is the item creator
+def checkUser(creator_id):
+    if creator_id == login_session['user_id']:
+        return True
+    else:
+        return False
+
+# Decorator to ensure a user is logged in before able to perform actions
+def loginRequired(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if 'username' not in login_session:
+            flash("You need to be logged in to perform this action")
+            return redirect('/login')
+        return func(*args, **kwargs)
+    return wrapper
 
 
 # Create a random string for login state and render the login screen
@@ -211,15 +231,12 @@ def search():
 
 # Add a new artist
 @app.route('/artists/add_artist/', methods=['GET', 'POST'])
+@loginRequired
 def addArtist():
     """
     Adds a new artist to the Artist table in db
     """
     user = login_session.get('username')
-    # Only a logged in user can add an artist
-    if 'username' not in login_session:
-        flash("You need to login to add an artist")
-        return redirect('/login')
 
     if request.method == 'POST':
         # Make sure an entry for artist does not already exist before
@@ -244,6 +261,7 @@ def addArtist():
 # Delete a particular artist
 @app.route('/artists/<int:idOfArtist>/<string:nameOfArtist>/delete_artist',
            methods=['GET', 'POST'])
+@loginRequired
 def deleteArtist(idOfArtist, nameOfArtist):
     """
     Deletes an artist from Artist table in db, this also deletes
@@ -265,6 +283,7 @@ def deleteArtist(idOfArtist, nameOfArtist):
 # Edit a particular artist
 @app.route('/artists/<int:idOfArtist>/<string:nameOfArtist>/edit_artist',
            methods=['GET', 'POST'])
+@loginRequired
 def editArtist(idOfArtist, nameOfArtist):
     """
     Edits the artist details in Artist table in db
@@ -317,15 +336,12 @@ def showArtistDetails(idOfArtist, nameOfArtist):
 # Add a new work for a particular artist
 @app.route('/artists/<int:idOfArtist>/<string:nameOfArtist>/add_work/',
            methods=['GET', 'POST'])
+@loginRequired
 def addArtWork(idOfArtist, nameOfArtist):
     """
     Adds an artwork to ArtWork table in db
     """
     user = login_session.get('username')
-    # Only a logged in user can add an art work
-    if 'username' not in login_session:
-        flash("You need to login to add an art work")
-        return redirect('/login')
 
     if request.method == 'POST':
         artistExists = session.query(Artist).filter_by(id=idOfArtist).one()
@@ -350,6 +366,7 @@ def addArtWork(idOfArtist, nameOfArtist):
 
 # Delete a work by a particular artist
 @app.route('/artists/<int:idOfArt>/delete_work/', methods=['GET', 'POST'])
+@loginRequired
 def deleteArtWork(idOfArt):
     """
     Deletes an artwork from ArtWork table in db
@@ -375,6 +392,7 @@ def deleteArtWork(idOfArt):
 
 # Edit an entry about an art work
 @app.route('/artists/<int:idOfArt>/edit_work/', methods=['GET', 'POST'])
+@loginRequired
 def editArtWork(idOfArt):
     """
     Edits the details of an artwork from ArtWork table in db
@@ -382,6 +400,7 @@ def editArtWork(idOfArt):
     user = login_session.get('username')
     art = session.query(ArtWork).filter_by(id=idOfArt).one()
     artist = session.query(Artist).filter_by(id=art.artist_id).one()
+
 
     if request.method == 'POST':
         art.title = request.form['title']
@@ -394,6 +413,13 @@ def editArtWork(idOfArt):
                                 nameOfArtist=artist.name,
                                 user=user))
     else:
+        #if not checkUser(art.creator_id):
+            #flash("Only the creator of " + art.title +" can edit it")
+            #return redirect(url_for('showArtistDetails',
+                            #idOfArtist=art.artist_id,
+                            #nameOfArtist=artist.name,
+                            #user=user))
+        #else:
         return render_template('edit_work.html', title=art.title,
                                id=idOfArt, year=art.year, image=art.image_link,
                                creator_id=art.creator_id,
