@@ -24,6 +24,7 @@ class Artist(Base):
     id = Column(Integer, primary_key = True)
     creator_id = Column(Integer, ForeignKey('user.id'))
     creator = relationship(User)
+    artworks = relationship("ArtWork", backref=backref('art_work'), cascade="all, delete")
 
 
 #Creates a table of artworks
@@ -35,7 +36,7 @@ class ArtWork(Base):
     year = Column(String(250))
     image_link = Column(String(250))
     artist_id = Column(Integer, ForeignKey('artist.id'))
-    artist = relationship(Artist, backref=backref('art_work'), cascade="all, delete")
+    artist = relationship(Artist)
     creator_id = Column(Integer, ForeignKey('user.id'))
     creator = relationship(User)
 
