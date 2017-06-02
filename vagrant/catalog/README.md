@@ -33,5 +33,3 @@ In order for the google user authentication to work you will need to create a Go
 
 Once project and client ID is created download the JSON file and save into the catalog project file and call it client_secrets.json.  
 
-
-
