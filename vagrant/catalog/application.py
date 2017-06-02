@@ -270,11 +270,12 @@ def deleteArtist(idOfArtist, nameOfArtist):
         return redirect(url_for('showArtists'))
     else:
         if artist.creator_id is not login_session['user_id']:
-            return render_template('not_creator.html', id = artist.id,
-                                   name = artist.name)
+            return render_template('not_creator.html', id=artist.id,
+                                   name=artist.name)
         else:
             return render_template('delete_artist.html', id=idOfArtist,
-                                   name=artist.name, user_id=login_session['user_id'],
+                                   name=artist.name,
+                                   user_id=login_session['user_id'],
                                    user=user)
 
 
@@ -300,11 +301,12 @@ def editArtist(idOfArtist, nameOfArtist):
                                 user=user))
     else:
         if artist.creator_id is not login_session['user_id']:
-            return render_template('not_creator.html', id = artist.id,
-                                   name = artist.name)
+            return render_template('not_creator.html', id=artist.id,
+                                   name=artist.name)
         else:
             return render_template('edit_artist.html', id=idOfArtist,
-                                   name=artist.name, user_id=login_session['user_id'],
+                                   name=artist.name,
+                                   user_id=login_session['user_id'],
                                    user=user)
 
 
@@ -386,8 +388,8 @@ def deleteArtWork(idOfArt):
                                 user=user))
     else:
         if art.creator_id is not login_session['user_id']:
-            return render_template('not_creator_art.html', id = artist.id,
-                                   name = artist.name, title = art.title)
+            return render_template('not_creator_art.html', id=artist.id,
+                                   name=artist.name, title=art.title)
         else:
             return render_template('delete_art.html', title=art.title,
                                    id=idOfArt, name=artist.name,
@@ -396,7 +398,8 @@ def deleteArtWork(idOfArt):
 
 
 # Edit an entry about an art work
-@app.route('/artists/<string:titleOfArt>/<int:idOfArt>/edit_work/', methods=['GET', 'POST'])
+@app.route('/artists/<string:titleOfArt>/<int:idOfArt>/edit_work/',
+           methods=['GET', 'POST'])
 @loginRequired
 def editArtWork(idOfArt, titleOfArt):
     """
@@ -418,11 +421,12 @@ def editArtWork(idOfArt, titleOfArt):
                                 user=user))
     else:
         if art.creator_id is not login_session['user_id']:
-            return render_template('not_creator_art.html', id = artist.id,
-                                   name = artist.name, title = art.title)
+            return render_template('not_creator_art.html', id=artist.id,
+                                   name=artist.name, title=art.title)
         else:
             return render_template('edit_work.html', title=art.title,
-                                   id=idOfArt, year=art.year, image=art.image_link,
+                                   id=idOfArt, year=art.year,
+                                   image=art.image_link,
                                    user_id=login_session['user_id'],
                                    idOfArtist=art.artist_id,
                                    nameOfArtist=artist.name,
