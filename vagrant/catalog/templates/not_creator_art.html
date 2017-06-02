@@ -1,0 +1,8 @@
+{% extends "main.html" %}
+{% block content %}
+    {% include "header.html" %}
+        <p>Only the user who created the entry for {{title}} can make changes!</p>
+        <form method='GET' action="{{url_for('showArtistDetails', title = title, idOfArtist = id, nameOfArtist = name)}}">
+            <input type="SUBMIT" class="btn btn-default" value="Cancel">
+        </form>
+{% endblock %}
