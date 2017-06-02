@@ -269,7 +269,11 @@ def deleteArtist(idOfArtist, nameOfArtist):
         session.commit()
         return redirect(url_for('showArtists'))
     else:
-        return render_template('delete_artist.html', id=idOfArtist,
+        if artist.creator_id is not login_session['user_id']:
+            return render_template('not_creator.html', id = artist.id,
+                                   name = artist.name)
+        else:
+            return render_template('delete_artist.html', id=idOfArtist,
                                name=artist.name, creator_id=artist.creator_id,
                                user_id=login_session['user_id'], user=user)
 
@@ -292,13 +296,17 @@ def editArtist(idOfArtist, nameOfArtist):
         items = session.query(ArtWork).filter_by(artist_id=idOfArtist)
         return redirect(url_for('showArtistDetails',
                                 idOfArtist=idOfArtist,
-                                nameOfArtist=nameOfArtist,
+                                nameOfArtist=artist.name,
                                 user=user))
     else:
-        return render_template('edit_artist.html', id=idOfArtist,
-                               name=artist.name, creator_id=artist.creator_id,
-                               user_id=login_session['user_id'],
-                               user=user)
+        if artist.creator_id is not login_session['user_id']:
+            return render_template('not_creator.html', id = artist.id,
+                                   name = artist.name)
+        else:
+            return render_template('edit_artist.html', id=idOfArtist,
+                                   name=artist.name, creator_id=artist.creator_id,
+                                   user_id=login_session['user_id'],
+                                   user=user)
 
 
 # Show all art works associated with particular artist

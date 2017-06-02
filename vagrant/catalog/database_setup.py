@@ -2,6 +2,7 @@ import sys
 from sqlalchemy import Column, ForeignKey, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm import backref
 
 Base = declarative_base()
 
@@ -34,7 +35,7 @@ class ArtWork(Base):
     year = Column(String(250))
     image_link = Column(String(250))
     artist_id = Column(Integer, ForeignKey('artist.id'))
-    artist = relationship(Artist, single_parent=True, cascade="all, delete-orphan")
+    artist = relationship(Artist, backref=backref('art_work'), cascade="all, delete")
     creator_id = Column(Integer, ForeignKey('user.id'))
     creator = relationship(User)
 

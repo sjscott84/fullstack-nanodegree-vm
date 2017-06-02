@@ -1,24 +1,17 @@
 {% extends "main.html" %}
 {% block content %}
     {% include "header.html" %}
-    {% if creator_id == user_id %}
-        <h4>Are you sure you want to delete {{name}} - this will also delete all work associated with {{name}}?</h4>
-        <div class="outer">
-            <div class="inner">
-                <form method='GET' action="{{url_for('showArtistDetails', idOfArtist = id, nameOfArtist = name)}}">
-                    <input type="SUBMIT" class="btn btn-default" value="Cancel">
-                </form>
-            </div>
-            <div class="inner">
-                <form method='POST' action="{{ url_for('deleteArtist', idOfArtist = id, nameOfArtist = name)}}">
-                    <input type="SUBMIT" class="btn btn-danger" value="Delete">
-                </form>
-            </div>
+    <h4>Are you sure you want to delete {{name}} - this will also delete all work associated with {{name}}?</h4>
+    <div class="outer">
+        <div class="inner">
+            <form method='GET' action="{{url_for('showArtistDetails', idOfArtist = id, nameOfArtist = name)}}">
+                <input type="SUBMIT" class="btn btn-default" value="Cancel">
+            </form>
         </div>
-    {% else %}
-        <p>Only the user who created the entry for {{name}} can delete it!</p>
-        <form method='GET' action="{{url_for('showArtistDetails', idOfArtist = id, nameOfArtist = name)}}">
-            <input type="SUBMIT" class="btn btn-default" value="Cancel">
-        </form>
-    {% endif %}
+        <div class="inner">
+            <form method='POST' action="{{ url_for('deleteArtist', idOfArtist = id, nameOfArtist = name)}}">
+                <input type="SUBMIT" class="btn btn-danger" value="Delete">
+            </form>
+        </div>
+    </div>
 {% endblock %}
